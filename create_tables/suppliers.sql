@@ -1,0 +1,13 @@
+CREATE TABLE suppliers (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    contact_info TEXT,
+    deleted_at TIMESTAMP DEFAULT NULL
+);
+
+DESC suppliers;
+
+SHOW CREATE TABLE suppliers;
+
+# JANGAN DIPAKE KALO GA PERLU!
+DROP TABLE suppliers;
