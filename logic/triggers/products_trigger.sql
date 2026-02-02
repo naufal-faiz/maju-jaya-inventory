@@ -14,7 +14,7 @@ VALUES (
         'name', NEW.name, 
         'current_price', NEW.current_price,  
         'min_stock', NEW.min_stock),
-    CURRENT_USER()
+    USER()
 );
 
 ## *** UPDATE PRODUCTS *** ##
@@ -22,6 +22,7 @@ CREATE TRIGGER trg_products_update
 AFTER UPDATE ON products
 FOR EACH ROW
 BEGIN
+    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL THEN
     INSERT INTO audit_logs (
         table_name,
         record_id,
@@ -44,16 +45,9 @@ BEGIN
             'current_price', NEW.current_price,
             'min_stock', NEW.min_stock
         ),
-        CURRENT_USER()
+        USER()
     );
-    END$$
-
-## *** DELETE PRODUCTS *** ##
-CREATE TRIGGER trg_products_audit_soft_delete
-AFTER UPDATE ON products
-FOR EACH ROW
-BEGIN
-    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    ELSEIF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
         INSERT INTO audit_logs (
             table_name,
             record_id,
@@ -68,10 +62,10 @@ BEGIN
             'DELETE',
             JSON_OBJECT('deleted_at', OLD.deleted_at),
             JSON_OBJECT('deleted_at', NEW.deleted_at),
-            CURRENT_USER()
+            USER()
         );
     END IF;
-END$$
+    END$$
 
 ## *** LOCK DELETED PRODUCTS *** ##
 CREATE TRIGGER trg_products_lock_deleted
@@ -84,13 +78,30 @@ BEGIN
     END IF;
 END$$
 
-DELIMITER ;
+## BELUM DIGUNAKAN ##
+## BLOCK USING DELETED DOCUMENT TO TRANSACTION ##
+CREATE TRIGGER trg_transactions_block_deleted_product
+BEFORE INSERT ON transactions
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM products
+        WHERE id = NEW.product_id
+        AND deleted_at IS NOT NULL
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Produk sudah dihapus dan tidak boleh digunakan';
+    END IF;
+END$$
+
+DELIMITER;
 
 SHOW TRIGGERS LIKE 'products';
 
 # JIKA DIPERLUKAN SAJA!!
 DROP TRIGGER IF EXISTS trg_products_insert;
+
 DROP TRIGGER IF EXISTS trg_products_update;
-DROP TRIGGER IF EXISTS trg_products_delete;
-DROP TRIGGER IF EXISTS trg_products_audit_soft_delete;
+
 DROP TRIGGER IF EXISTS trg_products_lock_deleted;

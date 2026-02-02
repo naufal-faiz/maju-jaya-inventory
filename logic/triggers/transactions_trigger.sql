@@ -23,7 +23,7 @@ BEGIN
             'document_id', NEW.document_id,
             'notes', NEW.notes
         ),
-        CURRENT_USER()
+        USER()
     );
 END$$
 
@@ -64,7 +64,7 @@ BEGIN
                 'document_id', NEW.document_id,
                 'notes', NEW.notes
             ),
-            CURRENT_USER()
+            USER()
         );
     END IF;
 END$$
@@ -91,10 +91,9 @@ CREATE TRIGGER trg_transactions_lock_posted
 BEFORE UPDATE ON transactions
 FOR EACH ROW
 BEGIN
-    IF OLD.status = 'POSTED'
-       AND NEW.status = 'POSTED'
-       AND CURRENT_USER() NOT LIKE '%supervisor%'
-       AND CURRENT_USER() NOT LIKE '%it_staff%'
+    IF NEW.status = 'POSTED'
+       AND USER() NOT LIKE '%supervisor%'
+       AND USER() NOT LIKE '%it_staff%'
     THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Status tidak boleh dipaksa POSTED. Perlu persetujuan Supervisor.';
@@ -127,7 +126,7 @@ BEGIN
             JSON_OBJECT(
                 'status', NEW.status
             ),
-            CURRENT_USER()
+            USER()
         );
         END IF;
         END$$

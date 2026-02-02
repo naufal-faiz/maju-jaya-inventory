@@ -36,19 +36,19 @@ JOIN transactions t ON td.transaction_id = t.id
 JOIN products p ON td.product_id = p.id
 WHERE
     p.deleted_at IS NULL
-    AND MONTH(t.transaction_date) = 1 -- VALUE INPUT
-    AND YEAR(t.transaction_date) = 2025 -- VALUE INPUT
+    AND MONTH(t.transaction_date) = 2 -- VALUE INPUT
+    AND YEAR(t.transaction_date) = 2026 -- VALUE INPUT
 GROUP BY p.id, MONTH(t.transaction_date), year(t.transaction_date)
 ORDER BY p.name;
 
-# *** UJI COBA *** #
+# *** STOCK MUTATION *** #
 SELECT
     p.product_code,
     p.name AS product_name,
     -- SALDO AWAL
     SUM(
         CASE
-            WHEN t.transaction_date < '2025-01-01'
+            WHEN t.transaction_date < '2026-01-30' -- INPUT TANGGAL AWAL
             THEN
                 CASE
                     WHEN t.transaction_type = 'IN'  THEN td.quantity
@@ -60,7 +60,7 @@ SELECT
     -- MUTASI BULANAN ON GOING
     SUM(
         CASE
-            WHEN t.transaction_date BETWEEN '2025-01-01' AND '2025-01-31'
+            WHEN t.transaction_date BETWEEN '2026-01-30' AND '2026-02-15' -- INPUT TANGGAL dan TANGGAL AKHIR
             THEN
                 CASE
                     WHEN t.transaction_type = 'IN'  THEN td.quantity
@@ -72,7 +72,7 @@ SELECT
     -- SALDO AKHIR
     SUM(
         CASE
-            WHEN t.transaction_date <= '2025-01-31'
+            WHEN t.transaction_date <= '2025-02-15' -- INPUT TANGGAL AKHIR
             THEN
                 CASE
                     WHEN t.transaction_type = 'IN'  THEN td.quantity

@@ -1,3 +1,10 @@
+# DROP USER
+DROP USER IF EXISTS 'fahmialfath.auditor'@'%';
+
+# DROP ROLE
+DROP ROLE IF EXISTS auditor_role;
+
+# CREATE ROLE
 CREATE ROLE auditor_role;
 GRANT SELECT ON maju_jaya_inventory.* TO auditor_role;
 

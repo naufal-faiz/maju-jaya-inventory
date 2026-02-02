@@ -55,7 +55,7 @@ BEGIN
             'unit_price', NEW.unit_price,
             'total_price', NEW.total_price
         ),
-        CURRENT_USER()
+        USER()
     );
 END$$
 

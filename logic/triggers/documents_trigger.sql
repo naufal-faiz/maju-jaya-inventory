@@ -14,7 +14,7 @@ VALUES (
         'document_number', NEW.document_number, 
         'document_type', NEW.document_type, 
         'description', NEW.description),
-    CURRENT_USER()
+    USER()
 );
 
 ## *** UPDATE documents *** ##
@@ -22,6 +22,7 @@ CREATE TRIGGER trg_documents_update
 AFTER UPDATE ON documents
 FOR EACH ROW
 BEGIN
+    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL THEN
     INSERT INTO audit_logs (
         table_name,
         record_id,
@@ -44,16 +45,9 @@ BEGIN
             'document_type', NEW.document_type,
             'description', NEW.description
         ),
-        CURRENT_USER()
+        USER()
     );
-    END$$
-
-## *** DELETE DOCUMENT *** ##
-CREATE TRIGGER trg_documents_audit_soft_delete
-AFTER UPDATE ON documents
-FOR EACH ROW
-BEGIN
-    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    ELSEIF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
         INSERT INTO audit_logs (
             table_name,
             record_id,
@@ -68,10 +62,10 @@ BEGIN
             'DELETE',
             JSON_OBJECT('deleted_at', OLD.deleted_at),
             JSON_OBJECT('deleted_at', NEW.deleted_at),
-            CURRENT_USER()
+            USER()
         );
     END IF;
-END$$
+    END$$
 
 ## *** LOCK DELETED DOCUMENT *** ##
 CREATE TRIGGER trg_documents_lock_deleted
@@ -84,6 +78,23 @@ BEGIN
     END IF;
 END$$
 
+## BELUM DIGUNAKAN ##
+## BLOCK USING DELETED DOCUMENT TO TRANSACTION ##
+CREATE TRIGGER trg_transactions_block_deleted_document
+BEFORE INSERT ON transactions
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM documents
+        WHERE id = NEW.document_id
+        AND deleted_at IS NOT NULL
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Dokumen sudah dihapus dan tidak boleh digunakan';
+    END IF;
+END$$
+
 DELIMITER;
 
 SHOW TRIGGERS LIKE 'documents';
@@ -93,6 +104,6 @@ DROP TRIGGER IF EXISTS trg_documents_insert;
 
 DROP TRIGGER IF EXISTS trg_documents_update;
 
-DROP TRIGGER IF EXISTS trg_documents_audit_soft_delete;
-
 DROP TRIGGER IF EXISTS trg_documents_lock_deleted;
+
+DROP TRIGGER IF EXISTS trg_transactions_block_deleted_document;

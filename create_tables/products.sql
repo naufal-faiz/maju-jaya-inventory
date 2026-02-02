@@ -4,8 +4,8 @@ CREATE TABLE products (
     name VARCHAR(255) NOT NULL,
     category_id INT NOT NULL,
     unit_of_measure VARCHAR(100) NOT NULL,
-    current_price DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    min_stock INT NOT NULL DEFAULT 0,
+    current_price DECIMAL(15, 2) UNSIGNED NOT NULL DEFAULT 0.00,
+    min_stock INT UNSIGNED NOT NULL DEFAULT 0,
     deleted_at TIMESTAMP DEFAULT NULL,
     INDEX name_idx (name),
     FOREIGN KEY (category_id) REFERENCES categories (id)

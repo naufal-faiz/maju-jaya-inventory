@@ -1,3 +1,10 @@
+# DROP USER
+DROP USER IF EXISTS 'nopaleon.it_staff'@'%';
+
+# DROP ROLE
+DROP ROLE IF EXISTS it_staff_role;
+
+# CREATE ROLE
 CREATE ROLE it_staff_role;
 GRANT ALL PRIVILEGES ON maju_jaya_inventory.* TO it_staff_role;
 

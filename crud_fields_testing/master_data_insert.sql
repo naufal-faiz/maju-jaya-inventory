@@ -1,3 +1,4 @@
+## *** INSERT CATEGORIES *** ##
 INSERT INTO
     categories (name, description)
 VALUES (
@@ -13,6 +14,9 @@ VALUES (
         'Televisi, AC, kulkas, dan lain-lain'
     );
 
+SELECT * FROM categories;
+
+## *** INSERT PRODUCTS *** ##
 INSERT INTO
     products (
         product_code,
@@ -63,6 +67,9 @@ VALUES (
         6
     );
 
+SELECT * FROM products;
+
+## *** INSERT SUPPLIERS *** ##
 INSERT INTO
     suppliers (name, contact_info)
 VALUES (
@@ -81,3 +88,5 @@ VALUES (
         'PT. Satyamita Kemas Lestari',
         'Phone: 08123456789, email: satyamita@kemas.com'
     );
+
+SELECT * FROM suppliers;
