@@ -1,3 +1,5 @@
+DROP PROCEDURE IF EXISTS sp_insert_product;
+
 DELIMITER $$
 
 ## *** STORED PROCEDURE INSERT PRODUCT *** ##
@@ -14,5 +16,3 @@ CREATE PROCEDURE sp_insert_product(
 END $$
 
 DELIMITER ;
-
-DROP PROCEDURE IF EXISTS sp_insert_product;
